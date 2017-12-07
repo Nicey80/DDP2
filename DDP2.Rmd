@@ -1,0 +1,71 @@
+---
+title: "Developing Data Products - Week2 Assignment"
+author: "Paul Nice"
+date: "2 December 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## This is a map of the UK showing the loaction of its English League football grounds
+
+
+
+```{r cars, echo=FALSE, message=FALSE, warning=FALSE}
+library(leaflet)
+library(tidyverse)
+
+St_data <- read_csv("stadia.csv")
+colnames(St_data)[7] <- "lng"
+
+getColor <- function(St_data) {
+        sapply(St_data$League,  USE.NAMES=FALSE, function(League) {
+            if(League == "Premier League") {
+                "green"
+            } else if(League == "Championship") {
+                "orange"
+            } else if(League == "League One") {
+                "blue"
+            } else {
+                "red"
+            } })
+    }
+    
+    icons <- awesomeIcons(
+        icon = 'glyphicon-hand-down',
+        iconColor = 'black',
+        library = 'glyphicon',
+        markerColor = getColor(St_data)
+    )
+    
+    popups <- paste(sep="<br/>",
+                     St_data$Stadium,
+                    St_data$Town...City,
+                    St_data$Club,
+                    St_data$Capacity)
+
+
+
+
+m <-     leaflet(St_data) %>%
+    setMaxBounds(lng1=9,
+                 lat1=59,
+                 lng2=-10,
+                 lat2=49) %>%
+    setView(-0.5, 52, zoom=8) %>%
+    #addProviderTiles(providers$Esri.WorldStreetMap)%>%
+    addTiles() %>%
+    addAwesomeMarkers(~lng, ~lat, label = ~Stadium, popup = popups,
+                      icon=icons,
+                      clusterOptions = markerClusterOptions()) %>%
+    addLegend(position = "topright", labels = unique(St_data$League), 
+              colors=c("Green","Orange","Blue","Red")
+    )
+
+m
+
+
+```
+
